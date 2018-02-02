@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net461</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="PropertyTests.fs" />
+    <Compile Include="GherkinTests.fs" />
+    <Compile Include="ExptectoTests.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\FbtBinPackingProject\FbtBinPackingProject.fsproj" />
+  </ItemGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
+</Project>

@@ -1,0 +1,10 @@
+FSharp.Core
+FsCheck.Xunit
+Unquote
+SpecFlow
+TickSpec
+NUnit
+Fake
+Expecto
+Expecto.BenchmarkDotNet
+Expecto.FsCheck

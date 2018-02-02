@@ -1,0 +1,7 @@
+Feature: A simple order should ideal fit into Box 12
+
+Scenario 1: Simple order fits into Box 12
+  Given a customer purchases an order
+  And said customer puts 3 toys into the his or her cart
+  When all available box selections are available
+  Then the order should ideal fit into 1 Box 12
