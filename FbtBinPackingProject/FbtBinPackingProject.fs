@@ -2,6 +2,8 @@ module FbtBinPackingProject
 
 /// ------------ Units of Measure ---------------
 [<Measure>] type inches
+[<Measure>] type kilograms
+[<Measure>] type degrees
 
 //
 // -------------   Model   --------------
@@ -20,12 +22,18 @@ type Dimensions =
     Height: decimal<inches>
   }
 
+type Orientation =
+  {
+      Phi: decimal<degrees>
+      Theta: decimal<degrees>
+  }
+
 type Toy =
   {
       Details: Details
       Dimensions: Dimensions
-      Orientation: string
-      Weight: decimal
+      Orientation: Orientation
+      Weight: decimal<kilograms>
   }
 
 type OrderId =
@@ -92,8 +100,11 @@ let customerOrder =
                                  Width = 5M<inches>;
                                  Height = 7M<inches>
                                };
-                  Orientation = "northwest";
-                  Weight = 7M
+                  Orientation = {
+                                 Theta = 90M<degrees>;
+                                 Phi = 180M<degrees>;
+                               };
+                  Weight = 7M<kilograms>
                 };
                 {
                   Details = {
@@ -105,8 +116,11 @@ let customerOrder =
                                  Width = 10M<inches>;
                                  Height = 14M<inches>
                                };
-                  Orientation = "southhwest";
-                  Weight = 14M
+                  Orientation = {
+                                 Theta = 0M<degrees>;
+                                 Phi = 90M<degrees>;
+                               };
+                  Weight = 14M<kilograms>
                 }                
              ];
     }
@@ -202,6 +216,14 @@ let getResult result =
 //
 // -------------   Logic   --------------
 //
+
+let getOrientation orientation =
+  match (orientation.Theta, orientation.Phi) with
+  |  (theta, phi) 
+      when theta >= 0M<degrees> && theta <= 360M<degrees>
+           && phi >= 0M<degrees> && theta <= 360M<degrees>
+         -> Success orientation
+  |  (_, _) -> Failure "Orientation does not exist"
 
 let getToy world =
   match Some(world.Order.Toys |> Seq.head) with 
