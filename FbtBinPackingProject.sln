@@ -9,6 +9,8 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FbtBinPackingProject.Tests"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "FbtBinPackingProject.Console", "FbtBinPackingProject.Console\FbtBinPackingProject.Console.fsproj", "{6AB818F1-04E1-4D7C-8B38-92552099CF44}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FbtBinPackingProject.VisualStudio.Tests", "FbtBinPackingProject.VisualStudio.Tests\FbtBinPackingProject.VisualStudio.Tests.fsproj", "{21E02900-5642-4B5A-B65F-73AE9A17E76C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{6AB818F1-04E1-4D7C-8B38-92552099CF44}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6AB818F1-04E1-4D7C-8B38-92552099CF44}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6AB818F1-04E1-4D7C-8B38-92552099CF44}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21E02900-5642-4B5A-B65F-73AE9A17E76C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21E02900-5642-4B5A-B65F-73AE9A17E76C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21E02900-5642-4B5A-B65F-73AE9A17E76C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21E02900-5642-4B5A-B65F-73AE9A17E76C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

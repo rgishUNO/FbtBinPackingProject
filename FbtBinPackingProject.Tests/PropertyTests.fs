@@ -5,23 +5,23 @@ open Swensen.Unquote
 open FbtBinPackingProject
 
 let boxData =         
-    {
-        Id = 
-          {
-              BoxId = "12";
-          }
-        Details =
-          {
-            Name = "Box12"
-            Description = "Our very favorite box, Box #12."
-          }
-        Dimensions =
-          {
-             Length = 12.125M<inches>;
-             Width = 12M<inches>;
-             Height = 12M<inches>
-          };
-    }
+  {
+      Id = 
+        {
+            BoxId = "12";
+        }
+      Details =
+        {
+          Name = "Box12"
+          Description = "Our very favorite box, Box #12."
+        }
+      Dimensions =
+        {
+           Length = 12.125M<centimeters>;
+           Width = 12M<centimeters>;
+           Height = 12M<centimeters>
+        };
+  }
 
 let box =
   match Some(boxData) with 

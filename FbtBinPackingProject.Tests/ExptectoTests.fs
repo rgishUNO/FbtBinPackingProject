@@ -17,9 +17,9 @@ let boxData =
           }
         Dimensions =
           {
-             Length = 12.125M<inches>;
-             Width = 12M<inches>;
-             Height = 12M<inches>
+             Length = 30M<centimeters>;
+             Width = 30M<centimeters>;
+             Height = 30M<centimeters>
           };
     }
 
