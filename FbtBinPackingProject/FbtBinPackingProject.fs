@@ -1,5 +1,6 @@
 module FbtBinPackingProject
 open System.Drawing
+open System.Runtime.CompilerServices
 
 /// ------------ Units of Measure ---------------
 [<Measure>] type centimeters
@@ -485,6 +486,32 @@ let  calculateIndexViaListOfExtremePoints (currentToy:Toy, setOfExtremePoints:Ex
       calculateIndexViaListOfExtremePointsRecursive(currentToy, tail, volume, maxValue, convexHull)
   | [] -> maxIndexSoFar
 
+let calculateToyExtremPoints(currentToy: Toy) =
+  let setOfExtremePoints = 
+    [
+      {
+        LeftFrontBottomPoint =
+          { 
+            X = currentToy.Origin.X + currentToy.Dimensions.Length
+            Y = currentToy.Origin.Y
+            Z =  currentToy.Origin.Z
+          }
+        RightBehindBottomPoint =
+          { 
+            X = currentToy.Origin.X
+            Y = currentToy.Origin.Y + currentToy.Dimensions.Width
+            Z = currentToy.Origin.Z
+          }
+        LeftBehindTopPoint = 
+          { 
+            X = currentToy.Origin.X
+            Y = currentToy.Origin.Y
+            Z = currentToy.Origin.Z + currentToy.Dimensions.Height
+          }
+      }
+    ]
+  setOfExtremePoints
+
 let rec fitnessEvaluation (toys:Toy list, box:Result<Box, string>, packing:Packing, convexHull:ConvexHull, maxIndexSoFar) =
   let accumulator = 0M<centimeters^3>
   match toys with
@@ -503,7 +530,47 @@ let rec fitnessEvaluation (toys:Toy list, box:Result<Box, string>, packing:Packi
       let currentToyVolume = volume head.Dimensions.Length head.Dimensions.Width head.Dimensions.Height
       let inclusiveToyVolume = packedToyVolume + currentToyVolume
       let index = calculateIndexViaListOfExtremePoints(head, packing.SetOfExtremePoints, inclusiveToyVolume, maxIndexSoFar, newConvexHull)
-      fitnessEvaluation(tail, box, packing, newConvexHull, maxIndexSoFar)
+      let (_, indexPoint) = index
+      let setOfExtremePointsFound = 
+        [
+          {
+            LeftFrontBottomPoint = indexPoint
+            RightBehindBottomPoint =
+              { 
+                X = 0M<centimeters>
+                Y = 0M<centimeters>
+                Z = 0M<centimeters>
+              }
+            LeftBehindTopPoint = 
+              { 
+                X = 0M<centimeters>
+                Y = 0M<centimeters>
+                Z = 0M<centimeters>
+              }
+          }
+        ]
+      let filteredExtremePoints = (Set packing.SetOfExtremePoints) - (Set setOfExtremePointsFound) |> Set.toList
+      let newPackedToy =
+        {
+          Details = head.Details
+          Dimensions = head.Dimensions
+          Weight = head.Weight
+          Origin = indexPoint
+        }
+      let newExtremePointsFromNewlyPackedToy = calculateToyExtremPoints(newPackedToy)
+      let newExtremPoints = (Set filteredExtremePoints) + (Set newExtremePointsFromNewlyPackedToy) |> Set.toList
+      let newOrder =
+        {
+          Details = packing.Order.Details
+          OrderId = packing.Order.OrderId
+          Toys = newPackedToy::packing.Order.Toys      
+        }
+      let newPacking =
+        {       
+          SetOfExtremePoints = newExtremPoints
+          Order = newOrder
+        }
+      fitnessEvaluation(tail, box, newPacking, newConvexHull, maxIndexSoFar)
   | [] -> []
 
 let getBox world =
