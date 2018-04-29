@@ -428,12 +428,15 @@ let convexHullHeight(extremePoint:Point, toy:Toy, currentConvexHullHeightMax) =
   let maxValueOfList = list |> List.max
   maxValueOfList
 
+let attemptingToDivideByZero volumeOfToysPackedSoFarIncludingCurrentToy =
+  volumeOfToysPackedSoFarIncludingCurrentToy = 0M<centimeters^3>
+
 /// Measure of height over the fill rate of the current convex hull
 let packingIndex(length:decimal<centimeters>, width:decimal<centimeters>, height:decimal<centimeters>, volumeOfToysPackedSoFarIncludingCurrentToy:decimal<centimeters^3>) =
   let heightSquared = height * height
   let numerator = length * width * heightSquared
   let index =
-    if (volumeOfToysPackedSoFarIncludingCurrentToy = 0M<centimeters^3>) then
+    if (attemptingToDivideByZero volumeOfToysPackedSoFarIncludingCurrentToy) then
       numerator/(1M * 1M<centimeters^3>)
     else
       (numerator/volumeOfToysPackedSoFarIncludingCurrentToy)
@@ -570,8 +573,8 @@ let rec fitnessEvaluation (toys:Toy list, box:Result<Box, string>, packing:Packi
           SetOfExtremePoints = newExtremPoints
           Order = newOrder
         }
-      fitnessEvaluation(tail, box, newPacking, newConvexHull, maxIndexSoFar)
-  | [] -> []
+      fitnessEvaluation(tail, box, newPacking, newConvexHull, index)
+  | [] -> packing
 
 let getBox world =
   match Some(world.AvailableBoxes |> Seq.head) with 
