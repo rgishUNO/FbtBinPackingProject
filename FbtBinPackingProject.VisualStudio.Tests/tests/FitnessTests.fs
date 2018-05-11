@@ -8,7 +8,261 @@ type FitnessTestModule() =
 
     member x.FitnessTest(failedTest:Failure) =
           try
-            executeFitnessEvaluation gameWorld |> ignore
+            let customerOrder_3_8_4_4 =
+              {
+                Details =
+                  {
+                    Name = "Order#1Name";
+                    Description = "Order#1Description"
+                  }
+                OrderId = 
+                  {
+                    OrderId = "Order#1";
+                  }
+                Toys = 
+                  [
+                    {
+                      Details = 
+                        {
+                          Name = "Toy#1Name";
+                          Description = "Toy#1Description"
+                        }
+                      Dimensions = 
+                        {
+                          Length = 8M<centimeters>
+                          Width = 4M<centimeters>
+                          Height = 4M<centimeters>
+                        }
+                      Weight = 1M<kilograms>
+                      Origin =             
+                        { 
+                          X = 0M<centimeters>
+                          Y = 0M<centimeters>
+                          Z = 0M<centimeters>
+                        }
+                    }
+                    {
+                      Details = 
+                        {
+                          Name = "Toy#2Name";
+                          Description = "Toy#2Description"
+                        };                 
+                      Dimensions = 
+                        {
+                          Length = 8M<centimeters>
+                          Width = 4M<centimeters>
+                          Height = 4M<centimeters>
+                        }
+                      Weight = 2M<kilograms>
+                      Origin =             
+                        { 
+                          X = 0M<centimeters>
+                          Y = 0M<centimeters>
+                          Z = 0M<centimeters>
+                        }
+                    }
+                    {
+                      Details = 
+                        {
+                          Name = "Toy#3Name";
+                          Description = "Toy#3Description"
+                        };                 
+                      Dimensions = 
+                        {
+                          Length = 8M<centimeters>
+                          Width = 4M<centimeters>
+                          Height = 4M<centimeters>
+                        }
+                      Weight = 2M<kilograms>
+                      Origin =             
+                        { 
+                          X = 0M<centimeters>
+                          Y = 0M<centimeters>
+                          Z = 0M<centimeters>
+                        }
+                    } 
+                  ]
+                }
+            let customerOrder_3_8_4_2Mix =
+              {
+                Details =
+                  {
+                    Name = "Order#1Name";
+                    Description = "Order#1Description"
+                  }
+                OrderId = 
+                  {
+                    OrderId = "Order#1";
+                  }
+                Toys = 
+                  [
+                    {
+                      Details = 
+                        {
+                          Name = "Toy#1Name";
+                          Description = "Toy#1Description"
+                        }
+                      Dimensions = 
+                        {
+                          Length = 8M<centimeters>
+                          Width = 4M<centimeters>
+                          Height = 2M<centimeters>
+                        }
+                      Weight = 1M<kilograms>
+                      Origin =             
+                        { 
+                          X = 0M<centimeters>
+                          Y = 0M<centimeters>
+                          Z = 0M<centimeters>
+                        }
+                    }
+                    {
+                      Details = 
+                        {
+                          Name = "Toy#2Name";
+                          Description = "Toy#2Description"
+                        };                 
+                      Dimensions = 
+                        {
+                          Length = 8M<centimeters>
+                          Width = 4M<centimeters>
+                          Height = 3M<centimeters>
+                        }
+                      Weight = 2M<kilograms>
+                      Origin =             
+                        { 
+                          X = 0M<centimeters>
+                          Y = 0M<centimeters>
+                          Z = 0M<centimeters>
+                        }
+                    }
+                    {
+                      Details = 
+                        {
+                          Name = "Toy#3Name";
+                          Description = "Toy#3Description"
+                        };                 
+                      Dimensions = 
+                        {
+                          Length = 8M<centimeters>
+                          Width = 4M<centimeters>
+                          Height = 4M<centimeters>
+                        }
+                      Weight = 2M<kilograms>
+                      Origin =             
+                        { 
+                          X = 0M<centimeters>
+                          Y = 0M<centimeters>
+                          Z = 0M<centimeters>
+                        }
+                    } 
+                  ]
+                }
+            let customerOrder_WuExample =
+              {
+                Details =
+                  {
+                    Name = "Order#1Name";
+                    Description = "Order#1Description"
+                  }
+                OrderId = 
+                  {
+                    OrderId = "Order#1";
+                  }
+                Toys = 
+                  [
+                    {
+                      Details = 
+                        {
+                          Name = "Toy#1Name";
+                          Description = "Toy#1Description"
+                        }
+                      Dimensions = 
+                        {
+                          Length = 6.4M<centimeters>
+                          Width = 6.4M<centimeters>
+                          Height = 5.2M<centimeters>
+                        }
+                      Weight = 1M<kilograms>
+                      Origin =             
+                        { 
+                          X = 0M<centimeters>
+                          Y = 0M<centimeters>
+                          Z = 0M<centimeters>
+                        }
+                    }
+                    {
+                      Details = 
+                        {
+                          Name = "Toy#2Name";
+                          Description = "Toy#2Description"
+                        };                 
+                      Dimensions = 
+                        {
+                          Length = 2.1M<centimeters>
+                          Width = 1.5M<centimeters>
+                          Height = 4.6M<centimeters>
+                        }
+                      Weight = 2M<kilograms>
+                      Origin =             
+                        { 
+                          X = 0M<centimeters>
+                          Y = 0M<centimeters>
+                          Z = 0M<centimeters>
+                        }
+                    }
+                  ]
+                }
+            let allBoxes_20_15_10 = 
+              [
+                {
+                    Id = 
+                      {
+                          BoxId = "20_15_10";
+                      }
+                    Details =
+                      {
+                        Name = "Box12"
+                        Description = "20 X 15X 10"
+                      }
+                    Dimensions =
+                      {
+                         Length = 20M<centimeters>;
+                         Width = 15M<centimeters>;
+                         Height = 10M<centimeters>
+                      };
+                }   
+              ]
+            let allBoxes_WuExample = 
+                          [
+                            {
+                                Id = 
+                                  {
+                                      BoxId = "14_14_11.5";
+                                  }
+                                Details =
+                                  {
+                                    Name = "Box12"
+                                    Description = "14 X 14 X 11.5"
+                                  }
+                                Dimensions =
+                                  {
+                                     Length = 14M<centimeters>;
+                                     Width = 14M<centimeters>;
+                                     Height = 11.5M<centimeters>
+                                  };
+                            }   
+                          ]
+            let gameWorld2 =
+              {
+                AvailableBoxes =
+                  allBoxes_WuExample
+                  |> Seq.map (fun box -> (box.Id, box))
+                  |> Map.ofSeq
+                Customer = customer
+                Order = customerOrder_WuExample       
+              }
+            executeFitnessEvaluation gameWorld2 |> ignore
           with
            | ex -> failedTest.Failed <- true; failedTest.Message <- ex.Message; failedTest.InnerException <- ex.InnerException.ToString();
 
