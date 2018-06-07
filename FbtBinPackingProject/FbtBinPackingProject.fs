@@ -410,7 +410,6 @@ let calculateConvexHullWithCurrentToy(extremePoint:Point, toy:Toy, convexHull:Co
           Height = maxValueOfListHeight
         }
     }
-
   newConvexHull
 
 let convexHullLength(extremePoint:Point, toy:Toy, currentConvexHullLengthMax) =
@@ -431,6 +430,15 @@ let convexHullHeight(extremePoint:Point, toy:Toy, currentConvexHullHeightMax) =
   let maxValueOfList = list |> List.max
   maxValueOfList
 
+let tolerance = 0.001M<centimeters>
+
+let roomInBoxForNewToy (dimensions:Dimensions, toy:Toy) =
+  let lengthAvailability = dimensions.Length - (toy.Origin.X + toy.Dimensions.Length) >= tolerance
+  let widthAvailability = dimensions.Width - (toy.Origin.Y + toy.Dimensions.Width) >= tolerance
+  let heightAvailability = dimensions.Height - (toy.Origin.Z + toy.Dimensions.Height) >= tolerance
+  let temp = heightAvailability
+  lengthAvailability && widthAvailability && heightAvailability
+
 let attemptingToDivideByZero volumeOfToysPackedSoFarIncludingCurrentToy =
   volumeOfToysPackedSoFarIncludingCurrentToy = 0M<centimeters^3>
 
@@ -438,6 +446,17 @@ let attemptingToDivideByZero volumeOfToysPackedSoFarIncludingCurrentToy =
 let packingIndex(length:decimal<centimeters>, width:decimal<centimeters>, height:decimal<centimeters>, volumeOfToysPackedSoFarIncludingCurrentToy:decimal<centimeters^3>) =
   let heightSquared = height * height
   let numerator = length * width * heightSquared
+  let index =
+    if (attemptingToDivideByZero volumeOfToysPackedSoFarIncludingCurrentToy) then
+      numerator/(1M * 1M<centimeters^3>)
+    else
+      (numerator/volumeOfToysPackedSoFarIncludingCurrentToy)
+  index
+
+let packingIndexZ(length:decimal<centimeters>, width:decimal<centimeters>, height:decimal<centimeters>, volumeOfToysPackedSoFarIncludingCurrentToy:decimal<centimeters^3>, lowestZRatio:decimal<centimeters>, roomRatio:decimal<centimeters>) =
+  let heightDifferential = height * lowestZRatio
+  let numerator = length * width * heightDifferential * roomRatio
+
   let index =
     if (attemptingToDivideByZero volumeOfToysPackedSoFarIncludingCurrentToy) then
       numerator/(1M * 1M<centimeters^3>)
@@ -461,11 +480,69 @@ let rec calculateIndex (currentToy:Toy, extremePoint:Point, volume:decimal<centi
   let max = maxPackingIndex index maxSoFar
   max
 
+let rec calculateIndexZValue (currentToy:Toy, box:Box, extremePoint:Point, volume:decimal<centimeters^3>, convexHull:ConvexHull, maxSoFar, lowestZRatio) =
+  let convexHullPoint = 
+    calculateConvexHullWithCurrentToy(extremePoint, currentToy, convexHull)
+  let lpj = convexHullPoint.Dimensions.Length
+  let wpj = convexHullPoint.Dimensions.Width
+  let hpj = convexHullPoint.Dimensions.Height
+  let newLowestZDifferential = 1M<centimeters> - max (extremePoint.Z - lowestZRatio) 0.1M<centimeters>
+  let currentToyAtExtremePoint = 
+        {
+          Details = currentToy.Details
+          Dimensions = currentToy.Dimensions
+          Weight = currentToy.Weight
+          Origin =             
+            { 
+              X = extremePoint.X
+              Y = extremePoint.Y
+              Z = extremePoint.Z
+            }
+        }
+  
+  let roomAvailable =  roomInBoxForNewToy (box.Dimensions, currentToyAtExtremePoint)
+  let roomRatio =
+    if roomAvailable then
+      1M<centimeters>
+    else
+      0M<centimeters>    
+  let index = (packingIndexZ(lpj, wpj, hpj, volume, newLowestZDifferential, roomRatio), extremePoint, convexHullPoint)
+
+  let max = maxPackingIndex index maxSoFar
+  max
+
 let rec calculateIndexViaListOfExtremePointsRecursive (currentToy:Toy, extremePoints:Point list, volume:decimal<centimeters^3>, maxIndexSoFar, convexHull:ConvexHull) =
   match extremePoints with
   | head :: tail ->
       let extremePointsIndex = calculateIndex(currentToy, head, volume, convexHull, maxIndexSoFar) 
       calculateIndexViaListOfExtremePointsRecursive(currentToy, tail, volume, extremePointsIndex, convexHull)
+  | [] -> maxIndexSoFar
+
+let rec calculateIndexViaListOfExtremePointsZValuesRecursive (box:Box, currentToy:Toy, extremePoints:Point list, volume:decimal<centimeters^3>, maxIndexSoFar, convexHull:ConvexHull, lowestZValue:decimal<centimeters>) =
+  match extremePoints with
+  | head :: tail ->
+      let extremePointsIndex = calculateIndexZValue(currentToy, box, head, volume, convexHull, maxIndexSoFar, lowestZValue) 
+      calculateIndexViaListOfExtremePointsZValuesRecursive(box, currentToy, tail, volume, extremePointsIndex, convexHull, lowestZValue)
+  | [] -> maxIndexSoFar
+
+let sortMethodForExtremePointZValues (point1:Point) (point2:Point)=
+  if (point1.Z > point2.Z) then
+    1
+  else if (point1.Z < point2.Z) then
+    -1
+  else
+    if (point1.Z = point2.Z) then
+      0
+    else
+      -1
+
+let  calculateIndexViaListOfExtremePointsZValues (currentToy:Toy, box:Box, setOfExtremePoints:Point list, volume:decimal<centimeters^3>, maxIndexSoFar, convexHull:ConvexHull) =
+  let sortedSetOfExtremePoints = (setOfExtremePoints |> List.sortWith(sortMethodForExtremePointZValues))
+  let lowestZValue = sortedSetOfExtremePoints.[0].Z
+  match sortedSetOfExtremePoints with
+  | head :: tail ->
+      let extremePointsIndex = calculateIndexZValue(currentToy, box, head, volume, convexHull, maxIndexSoFar, lowestZValue)
+      calculateIndexViaListOfExtremePointsZValuesRecursive(box, currentToy, tail, volume, extremePointsIndex, convexHull, lowestZValue)
   | [] -> maxIndexSoFar
 
 let  calculateIndexViaListOfExtremePoints (currentToy:Toy, setOfExtremePoints:Point list, volume:decimal<centimeters^3>, maxIndexSoFar, convexHull:ConvexHull) =
@@ -520,14 +597,6 @@ let doesBoxHaveEnoughFreeVolumeForToy (dimensions:Dimensions, toy:Toy, packing:P
   |  i when noVolumeLeft i -> blankPacking
   |  _ -> packing
 
-let tolerance = 0.001M<centimeters>
-
-let roomInBoxForNewToy (dimensions:Dimensions, toy:Toy) =
-  let lengthAvailability = dimensions.Length - (toy.Origin.X + toy.Dimensions.Length) >= tolerance
-  let widthAvailability = dimensions.Width - (toy.Origin.Y + toy.Dimensions.Width) >= tolerance
-  let heightAvailability = dimensions.Height - (toy.Origin.Z + toy.Dimensions.Height) >= tolerance
-  lengthAvailability && widthAvailability && heightAvailability
-
 let rec fitnessEvaluation (toys:Toy list, box:Box, packing:Packing, convexHull:ConvexHull, maxIndexSoFar) =
   let accumulator = 0M<centimeters^3>
   match toys with
@@ -573,6 +642,95 @@ let rec fitnessEvaluation (toys:Toy list, box:Box, packing:Packing, convexHull:C
       fitnessEvaluation(tail, box, newPacking, newConvexHull, index)
   | [] -> packing
 
+let rec packOrderInBoxRecursive (box:Box, toys:Toy list, packing:Packing, convexHull:ConvexHull, maxIndexSoFar) =
+  let accumulator = 0M<centimeters^3>
+  match toys with
+  | head :: tail ->
+    let currentToyVolume = volume head.Dimensions.Length head.Dimensions.Width head.Dimensions.Height
+    let packedToyVolume = getToysVolume(packing.Order.Toys, accumulator)
+    let inclusiveToyVolume = packedToyVolume + currentToyVolume
+    let index = calculateIndexViaListOfExtremePointsZValues(head, box, packing.SetOfExtremePoints, inclusiveToyVolume, maxIndexSoFar, convexHull)
+    let fitVolumePacking = doesBoxHaveEnoughFreeVolumeForToy(box.Dimensions, head, packing)
+    let (_, indexPoint, _) = index
+    let newConvexHull = calculateConvexHullWithCurrentToy(indexPoint, head, convexHull)
+    let setOfExtremePointsFound = 
+      [
+        {
+          X = indexPoint.X
+          Y = indexPoint.Y
+          Z = indexPoint.Z
+        }
+      ]
+    let filteredExtremePoints = (Set fitVolumePacking.SetOfExtremePoints) - (Set setOfExtremePointsFound) |> Set.toList
+    let newPackedToy =
+      {
+        Details = head.Details
+        Dimensions = head.Dimensions
+        Weight = head.Weight
+        Origin = indexPoint
+      }
+    let availability = roomInBoxForNewToy(box.Dimensions, newPackedToy)
+    let newExtremePointsFromNewlyPackedToy = calculateToyExtremePoints(newPackedToy)
+    let newExtremePoints = (Set filteredExtremePoints) + (Set newExtremePointsFromNewlyPackedToy) |> Set.toList
+    let newOrder =
+      {
+        Details = fitVolumePacking.Order.Details
+        OrderId = fitVolumePacking.Order.OrderId
+        Toys = newPackedToy::fitVolumePacking.Order.Toys      
+      }
+    let newPacking =
+      {       
+        SetOfExtremePoints = newExtremePoints
+        Order = newOrder
+      }
+    packOrderInBoxRecursive (box, tail, newPacking, convexHull, maxIndexSoFar)
+    | [] -> packing
+
+let packOrderInBox (box:Box, toys:Toy list, packing:Packing) =
+  let accumulator = 0M<centimeters^3>
+  let initialConvexHull =
+    {
+        Dimensions = 
+          {
+            Length = 0M<centimeters>
+            Width = 0M<centimeters>
+            Height = 0M<centimeters>
+          }
+    }
+  let initialPoint = 
+   {
+      X = 0M<centimeters>
+      Y = 0M<centimeters>
+      Z = 0M<centimeters>
+   }
+  let maxIndexSoFar = (0M<centimeters^2>, initialPoint, initialConvexHull)  
+  let newPacking = packOrderInBoxRecursive(box, toys, packing, initialConvexHull, maxIndexSoFar)
+  newPacking
+
+let rec algorithmEvaluation (boxes:Box list, toys:Toy list, packing:Packing, convexHull:ConvexHull, maxIndexSoFar) =
+  let accumulator = 0M<centimeters^3>
+  match boxes with
+  | head :: tail ->
+      let currentBoxVolume = volume head.Dimensions.Length head.Dimensions.Width head.Dimensions.Height
+      let currentOrderVolume = getToysVolume(toys, accumulator)
+      if (currentBoxVolume >= currentOrderVolume) then
+        packOrderInBox(head, toys, packing)
+      else
+        algorithmEvaluation(tail, toys, packing, convexHull, maxIndexSoFar)
+  | [] -> packing
+
+let sortMethodForBoxes (box1:Box) (box2:Box) =
+  let box1Volume = volume box1.Dimensions.Length box1.Dimensions.Width box1.Dimensions.Height
+  let box2Volume = volume box2.Dimensions.Length box2.Dimensions.Width box2.Dimensions.Height
+  if (box1Volume < box2Volume) then
+    1
+  else
+    -1
+
+let firstFitDecreasingAlgorithm(boxes:Box list, toys:Toy list, packing:Packing) =
+  let sortedBoxesByVolume = boxes |> List.sortWith (sortMethodForBoxes)
+  sortedBoxesByVolume
+
 let getPoint (point:Point) =
   match point with 
   |  point -> Success point
@@ -584,11 +742,6 @@ let getPacking (packing:Packing) =
 let getConvexHull (convexHull:ConvexHull) =
   match convexHull with 
   |  convexHull -> Success convexHull
-
-let getBox world =
-  match Some(world.AvailableBoxes |> Seq.head) with 
-  |  Some (KeyValue(k, v)) -> Success v
-  |  None -> Failure "Box does not exist"  
 
 let blankBox =
      {
@@ -608,6 +761,28 @@ let blankBox =
              Height = 0M<centimeters>
           };
     }
+
+let blankBoxes =
+    [
+      blankBox
+    ]
+
+let getBox world =
+  let tempValue = world.AvailableBoxes |> Seq.head
+  match Some(tempValue) with 
+  |  Some (KeyValue(k, v)) -> Success v
+  |  None -> Failure "Box does not exist"
+
+let getBoxZ2 world =
+  match Some(world.AvailableBoxes |> Seq.map(fun (KeyValue(k,v)) -> v)) with 
+  |  Some v -> v |> Seq.toList
+  |  None -> blankBoxes
+
+let getBoxes world =
+  let tempValues = world.AvailableBoxes |> Seq.map(fun (KeyValue(k,v)) -> v)
+  match Some(tempValues) with 
+  |  Some v -> Success v
+  |  None -> Failure "Box does not exist"  
 
 let getBox2 world =
   match Some(world.AvailableBoxes |> Seq.head) with 
@@ -643,6 +818,33 @@ let executeFitnessEvaluation world =
    }
   let maxIndexSoFar = (0M<centimeters>, initialPoint, initialConvexHull)
   fitnessEvaluation(world.Order.Toys, box, packing, initialConvexHull, maxIndexSoFar)
+
+
+let executeAlgorithmEvaluation world =
+  let packing =
+    {       
+      SetOfExtremePoints = initialSetOfExtremePoints
+      Order = blankOrder
+    }
+  let box = getBox2 world
+  let initialConvexHull =
+    {
+        Dimensions = 
+          {
+            Length = 0M<centimeters>
+            Width = 0M<centimeters>
+            Height = 0M<centimeters>
+          }
+    }
+  let initialPoint = 
+   {
+      X = 0M<centimeters>
+      Y = 0M<centimeters>
+      Z = 0M<centimeters>
+   }
+  let maxIndexSoFar = (-1000M<centimeters>, initialPoint, initialConvexHull)
+  let boxes = getBoxZ2 world
+  algorithmEvaluation(boxes, world.Order.Toys, packing, initialConvexHull, maxIndexSoFar)
 
 let getToy world =
   match Some(world.Order.Toys |> Seq.head) with 
